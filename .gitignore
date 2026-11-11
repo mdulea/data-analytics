@@ -1,0 +1,29 @@
+# Preserve data directories through placeholders while excluding datasets.
+/data/**
+!/data/**/
+!/data/**/.gitkeep
+
+# Local Python environments and generated files.
+.venv/
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+/build/
+/dist/
+
+# Jupyter checkpoints and local IPython state.
+.ipynb_checkpoints/
+.ipython/
+
+# Local credentials and environment variables.
+.env
+.env.*
+!.env.example
+/.aws/
+
+# Operating system files.
+.DS_Store
+Thumbs.db
