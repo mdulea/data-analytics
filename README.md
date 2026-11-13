@@ -62,12 +62,12 @@ The templates in `notebooks/` have separate purposes:
 | Template | Purpose |
 | --- | --- |
 | `explore.ipynb` | Discover Excel sheets, load a sheet and inspect column types, missing values and distinct counts. |
-| `transform.ipynb` | Load a DataFrame named `transform` before cleaning. |
+| `transform.ipynb` | Load a DataFrame named `df` before cleaning. |
 | `synthetic.ipynb` | Generate synthetic tabular data with SDV. |
 
 Copy a template to `notebooks/explorations/<raw-stem>.ipynb` before changes for a particular source. The source stem is its filename without the extension. Preserve its case, spaces and punctuation. If source stems match across extensions, use names such as `example.xlsx.ipynb` and `example.csv.ipynb`.
 
-Set the source path and selected sheet in the copy. Keep all selected sheets from one source file in the same notebook. Paste cleaning operations into Data Wrangler, preview them against the data, then apply them. Export Data Wrangler edits to that same notebook copy. Keep the templates reusable.
+Set the source path and selected sheet in the copy. Keep all selected sheets from one source file in the same notebook. Paste cleaning operations into Data Wrangler, preview them against the data, then apply them. Export Data Wrangler edits to that same notebook copy. Keep the templates reusable. Each DataFrame preview uses `df`. Later preview cells replace the current `df`, including the column profile in `explore.ipynb`.
 
 ## Data and paths
 

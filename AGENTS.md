@@ -38,6 +38,7 @@ Unless user overrides: VS Code + Data Wrangler open on dataset; request == custo
 ## Notebook/code work on request
 
 - Follow the shared notebook, output-naming and code conventions in `README.md`.
+- Define every notebook DataFrame as `df`; use `df` in previews and subsequent operations.
 - Source stems collide: ask before a conflicting output write.
 - Preserve existing cell outputs; restructure only within request scope.
 - Run checks without executing notebook cells. Default: user runs cells.
