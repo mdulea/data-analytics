@@ -61,11 +61,19 @@ The templates in `notebooks/` have separate purposes:
 
 | Template | Purpose |
 | --- | --- |
+| `convert.ipynb` | Convert CSV or a selected Excel sheet to `data/raw/parquet/`, with values read as strings. |
 | `explore.ipynb` | Discover tables in CSV, Parquet or Excel files and inspect column types, missing values and distinct counts. |
-| `transform.ipynb` | Load CSV, Parquet or Excel data into a DataFrame named `df` before cleaning. |
+| `transform.ipynb` | Load raw Parquet into `df`, apply Data Wrangler transformations and optionally save cleaned Parquet. |
+| `export.ipynb` | Export processed Parquet to `.xlsx` with data and source Parquet schema sheets. |
 | `synthetic.ipynb` | Generate synthetic tabular data with SDV. |
 
 Copy a template to `notebooks/explorations/<raw-stem>.ipynb` before changes for a particular source. The source stem is its filename without the extension. Preserve its case, spaces and punctuation. If source stems match across extensions, use names such as `example.xlsx.ipynb` and `example.csv.ipynb`.
+
+Use `convert.ipynb` first to save `data/raw/parquet/<raw-stem>.parquet` from a CSV or Excel source. The save cell creates the output folder if needed. It uses `dtype=str` and `keep_default_na=False` to preserve text identifiers, empty strings and null markers for later cleaning. Excel display formatting is not preserved. Select one workbook sheet per conversion. Existing outputs block writes, including matching stems from different sources or sheets. Load the resulting Parquet in `transform.ipynb` for Data Wrangler transformations and later type conversion.
+
+Inspect the original source with `explore.ipynb` before conversion. Copy `transform.ipynb` to an exploration notebook and select its raw Parquet sibling under `data/raw/parquet/`. Export Data Wrangler steps into the transformation cell and keep their result in `df`. Run the optional final save cell after cleaning to write `data/processed/<raw-stem>.parquet` with the transformed column types and without the DataFrame index. The cell creates the output folder and blocks existing outputs. Loading and transforming `df` does not overwrite the source file.
+
+Use `export.ipynb` to share a processed dataset as `data/exports/<raw-stem>.xlsx`. The `data` sheet contains the values without a DataFrame index. The `data_types` sheet records `column_name` and `parquet_type` directly from the source Parquet schema. Excel precision limits require long integers, exact decimals and some floats to be text. Dates, times, timestamps and durations are text. Missing values are blank cells. Unsupported values and Excel size limits stop the export. Existing exports cannot be overwritten. Keep the processed Parquet for further analysis with its original schema.
 
 Set the source path in the copy. CSV and Parquet files hold one table. For Excel files, set the selected sheet and keep all selected sheets from one source file in the same notebook. Paste cleaning operations into Data Wrangler, preview them against the data, then apply them. Export Data Wrangler edits to that same notebook copy. Keep the templates reusable. Each DataFrame preview uses `df`. Later preview cells replace the current `df`, including the column profile in `explore.ipynb`.
 
@@ -73,8 +81,10 @@ Set the source path in the copy. CSV and Parquet files hold one table. For Excel
 
 | Directory | Contents |
 | --- | --- |
-| `data/raw/` | Read-only source files. Never modify, move or delete them as part of analysis. |
+| `data/raw/` | Source files. Never modify, move or delete existing files as part of analysis. |
+| `data/raw/parquet/` | Raw Parquet conversions saved by the user. Existing files cannot be overwritten. |
 | `data/processed/` | Cleaned Parquet outputs saved by the user. |
+| `data/exports/` | Excel delivery copies of processed Parquet, with source schema sheets. |
 | `data/synthetic/` | Labeled synthetic datasets from SDV. |
 
 Use paths relative to the project root. Read source data from `data/raw/`. Save cleaned data as `data/processed/<raw-stem>.parquet`. Replace only the source extension and preserve the exact stem. Do not append sheet names, dates or suffixes such as `_clean`. Resolve matching source stems before writing conflicting outputs. Confirm before overwriting an existing processed file.
