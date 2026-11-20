@@ -1,38 +1,38 @@
-# Data analytics
+# Data analytics invariants
 
-A Jupyter workspace for exploring and cleaning tabular data with pandas and VS Code Data Wrangler. It also generates synthetic data modeled on real datasets. Follow the setup below, then copy a notebook template before analyzing a source file.
+Jupyter workspace: pandas + VS Code Data Wrangler for tabular exploration/cleaning; synthetic data modeled on real datasets. Setup first, then copy notebook template before source analysis.
 
 ## Setup
 
-uv manages the project's Python environment and dependencies. The project root is the directory containing `pyproject.toml`.
+uv manages Python/dependencies; project root contains `pyproject.toml`.
 
-### 1. Install uv
+### Install uv
 
-Run `uv --version`. If uv is installed, skip the installer for your operating system.
+Check `uv --version`; installed -> skip OS installer.
 
 #### Windows
 
-Run in PowerShell:
+PowerShell:
 
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-Restart the terminal. Install VS Code if needed and enable its installer's option to add `code` to PATH so the terminal can find the command.
+Restart terminal. Install VS Code if needed; enable installer option adding `code` to PATH.
 
 #### macOS
 
-Run in Terminal:
+Terminal:
 
 ```sh
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-Restart the terminal. Install VS Code if needed. Open its Command Palette from the View menu and run "Shell Command: Install 'code' command in PATH" so the terminal can find `code`. Restart the terminal.
+Restart terminal. Install VS Code if needed; View -> Command Palette -> "Shell Command: Install 'code' command in PATH". Restart terminal.
 
-### 2. Run shared setup commands
+### Shared setup
 
-Run these commands from the project root on Windows or macOS:
+Windows/macOS, from project root; commands as written:
 
 ```sh
 uv --version
@@ -42,11 +42,11 @@ uv sync --locked
 code .
 ```
 
-In each notebook's kernel picker, choose the Python environment in `.venv` to execute its cells. Python 3.12 or later is required. Execute Python programs through `uv run <command>`. Run the displayed setup commands as written. Do not use `pip` or activate the environment manually. Let uv manage `uv.lock`; do not edit it by hand.
+Python 3.12+ required. Each notebook kernel picker: choose `.venv` Python environment for cell execution. Python programs: `uv run <command>`. `pip`, manual environment activation and hand edits to `uv.lock` forbidden; uv manages lock.
 
-### Create a project from scratch
+### New project only
 
-Use these commands only when creating a new project without `pyproject.toml`. Existing checkouts use the shared setup above.
+New project without `pyproject.toml` -> commands here; existing checkouts -> shared setup.
 
 ```sh
 uv init --bare --vcs none --no-package --description "Add your description here"
@@ -57,55 +57,56 @@ uv add duckdb ipykernel jupyter openpyxl pandas pyarrow python-calamine sdv
 
 ## Notebook workflow
 
-The templates in `notebooks/` have separate purposes:
+Templates in `notebooks/`:
 
-| Template | Purpose |
-| --- | --- |
-| `convert.ipynb` | Convert CSV or a selected Excel sheet to `data/raw/parquet/`, with values read as strings. |
-| `explore.ipynb` | Discover tables in CSV, Parquet or Excel files and inspect column types, missing values and distinct counts. |
-| `transform.ipynb` | Load raw Parquet into `df`, apply Data Wrangler transformations and optionally save cleaned Parquet. |
-| `export.ipynb` | Export processed Parquet to `.xlsx` with data and source Parquet schema sheets. |
-| `synthetic.ipynb` | Generate synthetic tabular data with SDV. |
+- `convert.ipynb`: CSV/selected Excel sheet -> string-valued `data/raw/parquet/`.
+- `explore.ipynb`: discover CSV/Parquet/Excel tables; inspect column types, missing values, distinct counts.
+- `transform.ipynb`: raw Parquet -> `df` -> Data Wrangler transformations -> optional cleaned Parquet save.
+- `export.ipynb`: processed Parquet -> `.xlsx` data/source-schema sheets.
+- `synthetic.ipynb`: SDV synthetic tabular data.
 
-Copy a template to `notebooks/explorations/<raw-stem>.ipynb` before changes for a particular source. The source stem is its filename without the extension. Preserve its case, spaces and punctuation. If source stems match across extensions, use names such as `example.xlsx.ipynb` and `example.csv.ipynb`.
+Before source-specific edits, copy template to `notebooks/explorations/<raw-stem>.ipynb`. Stem = filename minus extension; preserve case, spaces, punctuation. Cross-extension matching stems -> `example.xlsx.ipynb`, `example.csv.ipynb`.
 
-Use `convert.ipynb` first to save `data/raw/parquet/<raw-stem>.parquet` from a CSV or Excel source. The save cell creates the output folder if needed. It uses `dtype=str` and `keep_default_na=False` to preserve text identifiers, empty strings and null markers for later cleaning. Excel display formatting is not preserved. Select one workbook sheet per conversion. Existing outputs block writes, including matching stems from different sources or sheets. Load the resulting Parquet in `transform.ipynb` for Data Wrangler transformations and later type conversion.
+Inspect original with `explore.ipynb` before conversion. `convert.ipynb`: CSV/Excel -> `data/raw/parquet/<raw-stem>.parquet`; save creates folder. `dtype=str` + `keep_default_na=False` preserve text identifiers, empty strings, null markers for later cleaning. Excel display formatting lost; one sheet/conversion. Existing outputs block writes, including matching stems across sources/sheets.
 
-Inspect the original source with `explore.ipynb` before conversion. Copy `transform.ipynb` to an exploration notebook and select its raw Parquet sibling under `data/raw/parquet/`. Export Data Wrangler steps into the transformation cell and keep their result in `df`. Run the optional final save cell after cleaning to write `data/processed/<raw-stem>.parquet` with the transformed column types and without the DataFrame index. The cell creates the output folder and blocks existing outputs. Loading and transforming `df` does not overwrite the source file.
+Copy `transform.ipynb` to exploration notebook; select raw Parquet sibling in `data/raw/parquet/`. Export Data Wrangler steps to transformation cell; result `df`; convert types after raw conversion. After cleaning, optional final save creates folder and writes `data/processed/<raw-stem>.parquet` with transformed types, without index; existing outputs blocked. Loading/transforming `df` leaves source unchanged.
 
-Use `export.ipynb` to share a processed dataset as `data/exports/<raw-stem>.xlsx`. The `data` sheet contains the values without a DataFrame index. The `data_types` sheet records `column_name` and `parquet_type` directly from the source Parquet schema. Excel precision limits require long integers, exact decimals and some floats to be text. Dates, times, timestamps and durations are text. Missing values are blank cells. Unsupported values and Excel size limits stop the export. Existing exports cannot be overwritten. Keep the processed Parquet for further analysis with its original schema.
+`export.ipynb` -> `data/exports/<raw-stem>.xlsx`:
 
-Set the source path in the copy. CSV and Parquet files hold one table. For Excel files, set the selected sheet and keep all selected sheets from one source file in the same notebook. Paste cleaning operations into Data Wrangler, preview them against the data, then apply them. Export Data Wrangler edits to that same notebook copy. Keep the templates reusable. Each DataFrame preview uses `df`. Later preview cells replace the current `df`, including the column profile in `explore.ipynb`.
+- `data`: values without DataFrame index.
+- `data_types`: `column_name`, `parquet_type` directly from source Parquet schema.
+- Excel precision: long integers, exact decimals, some floats as text; dates/times/timestamps/durations as text; missing values as blank cells.
+- Unsupported values/Excel size limits stop export; existing exports blocked. Retain processed Parquet for analysis with original schema.
+
+Set source path in copy. CSV/Parquet: one table. Excel: select sheet; keep all selected sheets from one source in same notebook. Data Wrangler: paste cleaning -> preview against data -> apply -> export edits to same notebook copy. Keep templates reusable. Every DataFrame preview uses `df`; later previews replace current `df`, including `explore.ipynb` column profile.
 
 ## Data and paths
 
-| Directory | Contents |
-| --- | --- |
-| `data/raw/` | Source files. Never modify, move or delete existing files as part of analysis. |
-| `data/raw/parquet/` | Raw Parquet conversions saved by the user. Existing files cannot be overwritten. |
-| `data/processed/` | Cleaned Parquet outputs saved by the user. |
-| `data/exports/` | Excel delivery copies of processed Parquet, with source schema sheets. |
-| `data/synthetic/` | Labeled synthetic datasets from SDV. |
+- `data/raw/`: sources; NEVER modify/move/delete existing files during analysis.
+- `data/raw/parquet/`: user-saved raw conversions; existing outputs blocked.
+- `data/processed/`: user-saved cleaned Parquet.
+- `data/exports/`: processed Parquet Excel delivery copies + source schema sheets.
+- `data/synthetic/`: labeled SDV synthetic datasets.
 
-Use paths relative to the project root. Read source data from `data/raw/`. Save cleaned data as `data/processed/<raw-stem>.parquet`. Replace only the source extension and preserve the exact stem. Do not append sheet names, dates or suffixes such as `_clean`. Resolve matching source stems before writing conflicting outputs. Confirm before overwriting an existing processed file.
+Paths relative to project root; read sources from `data/raw/`; cleaned output `data/processed/<raw-stem>.parquet`. Replace extension only; preserve exact stem. Sheet names, dates, suffixes such as `_clean` forbidden. Resolve matching stems before conflicting writes; confirm existing processed overwrite.
 
-For Excel reads, use `pd.read_excel(path, engine="calamine")`. Use `openpyxl` for Excel writes and `pyarrow` for Parquet. Use DuckDB for large file or DataFrame queries, or when SQL is clearer. Use SDV only for synthetic generation.
+Excel reads: `pd.read_excel(path, engine="calamine")`; Excel writes: `openpyxl`; Parquet: `pyarrow`. DuckDB: large file/DataFrame queries or clearer SQL. SDV: synthetic generation only.
 
 ## Contributing
 
-Track notebooks, reusable code and documentation. Under `data/`, track only empty `.gitkeep` placeholders. Never force-add ignored files. Exclude credentials, local environments, generated files and unrelated changes.
+Track notebooks, reusable code, docs; under `data/`, only empty `.gitkeep` placeholders. Force-adding ignored files forbidden. Exclude credentials, local environments, generated files, unrelated changes.
 
-Before staging a notebook, inspect its saved outputs and embedded data for dataset contents or sensitive values. Do not stage exposed data. Stage explicit paths and review the staged diff before committing.
+Before notebook staging: inspect saved outputs/embedded data for dataset contents/sensitive values; staging exposed data forbidden. Stage explicit paths; review staged diff before committing.
 
-Use branches named `<type>/<short-purpose>` with lowercase, hyphen-separated words. Use commit subjects of the form `<type>: <reason>`. Allowed types are `feat`, `fix`, `refactor`, `docs`, `test`, `chore` and `perf`. Explain why the change is needed. Keep one purpose per commit; use an optional body for motivation, constraints or tradeoffs.
+Branches: `<type>/<short-purpose>`, lowercase hyphen-separated words. Commit subjects: `<type>: <reason>`; types `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`. Explain why; one purpose/commit; optional body for motivation, constraints, tradeoffs.
 
 ### Code conventions
 
-Use Python 3.12 syntax, type hints on functions and `snake_case` for variables and new columns. Keep notebook cells small and single-purpose, with imports in the first code cell. When restructuring notebooks, preserve existing cell outputs and limit changes to the requested scope.
+Python 3.12 syntax; function type hints; `snake_case` variables/new columns. Small, single-purpose notebook cells; imports in first code cell. Restructuring: preserve outputs; changes within request scope.
 
-Do not write Python or notebook code docstrings. Use `#` comments only for decisions or reasons that the code and filenames do not explain. Prefer explicit column selection and clear boolean masks.
+Python/notebook docstrings forbidden. `#` comments only for decisions/reasons unexplained by code/filenames. Prefer explicit column selection, clear boolean masks.
 
-Run appropriate checks before committing. Python and notebook changes require all three commands:
+Before committing: run appropriate checks. Python/notebook changes require all three:
 
 ```sh
 uv run ruff format
@@ -113,19 +114,17 @@ uv run ruff check
 uv run python scripts/typecheck.py
 ```
 
-The type checker uses strict Pyright settings from `pyproject.toml`. It checks notebook code through temporary Python files with cell-number comments for diagnostics. It does not execute notebook cells.
+Type checker: strict Pyright settings from `pyproject.toml`; notebooks checked via temporary Python files with cell-number diagnostic comments; cells unexecuted.
 
-## Dependencies
+## Dependencies and agent output
 
-| Package | Purpose |
-| --- | --- |
-| `duckdb` | SQL queries over files and DataFrames. |
-| `ipykernel` | Python execution in notebook kernels. |
-| `jupyter` | Interactive notebook tools. |
-| `openpyxl` | Excel `.xlsx` reading and writing. |
-| `pandas` | DataFrame cleaning, transformation and analysis. |
-| `pyarrow` | Arrow data held in memory by column, and reading and writing the column-based Parquet file format. |
-| `python-calamine` | Excel and OpenDocument spreadsheet reading. |
-| `sdv` | Synthetic tabular data generation from real datasets. |
+- `duckdb`: SQL queries over files/DataFrames.
+- `ipykernel`: notebook Python execution.
+- `jupyter`: interactive notebook tools.
+- `openpyxl`: Excel `.xlsx` reads/writes.
+- `pandas`: DataFrame cleaning/transformation/analysis.
+- `pyarrow`: Arrow in-memory columns; column-based Parquet reads/writes.
+- `python-calamine`: Excel/OpenDocument reads.
+- `sdv`: synthetic tabular data from real datasets.
 
-Development tools are Ruff for formatting and checking code rules, Pyright for type checks, and `pandas-stubs` for pandas type definitions. [AGENTS.md](AGENTS.md) contains agent permissions and the cleaning snippet contract.
+Development: Ruff formatting/code rules; Pyright type checks; `pandas-stubs` pandas type definitions. [AGENTS.md](AGENTS.md): agent permissions + cleaning snippet contract.
